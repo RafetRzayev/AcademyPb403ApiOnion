@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Filter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-builder {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 200px 150px 200px 100px auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .raw-filter {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin-top: 15px;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+
+        .examples {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .examples h3 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .examples code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🎓 Student Filter System</h1>
+            <p class="subtitle">Build dynamic filters using LINQ expressions</p>
+
+            <div class="form-group">
+                <label>API Endpoint URL</label>
+                <input type="text" id="apiUrl" value="https://localhost:7295/api/Students" placeholder="Enter your API endpoint">
+            </div>
+
+            <div class="filter-builder">
+                <h3 style="margin-bottom: 15px;">Filter Builder</h3>
+                <div id="filterRows"></div>
+                <button class="btn btn-success" onclick="addFilterRow()">+ Add Filter</button>
+            </div>
+
+            <div class="form-group">
+                <label>Includes (comma-separated)</label>
+                <input type="text" id="includes" value="Group" placeholder="e.g., Group,Department,Courses">
+            </div>
+
+            <div class="form-group">
+                <label>Raw Filter Expression (Advanced)</label>
+                <input type="text" id="rawFilter" placeholder='e.g., Age > 20 && Name.Contains("John")'>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="fetchStudents()">🔍 Search Students</button>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
+            </div>
+
+            <div id="currentFilter"></div>
+        </div>
+
+        <div class="examples">
+            <h3>💡 Filter Examples:</h3>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><code>Age > 20</code> - Students older than 20</li>
+                <li><code>Age >= 18 && Age <= 25</code> - Students between 18 and 25</li>
+                <li><code>Name.Contains("John")</code> - Students with "John" in name</li>
+                <li><code>Name.StartsWith("A")</code> - Students whose name starts with "A"</li>
+                <li><code>Age > 20 || Name == "John"</code> - Age over 20 OR name is John</li>
+            </ul>
+        </div>
+
+        <div class="card results" id="resultsCard" style="display: none;">
+            <h2>Results</h2>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let filterCount = 0;
+
+        function addFilterRow() {
+            filterCount++;
+            const container = document.getElementById('filterRows');
+            const row = document.createElement('div');
+            row.className = 'filter-row';
+            row.id = `filter-${filterCount}`;
+
+            row.innerHTML = `
+                    <select class="property">
+                        <option value="Age">Age</option>
+                        <option value="Name">Name</option>
+                        <option value="Email">Email</option>
+                        <option value="GPA">GPA</option>
+                    </select>
+                    <select class="operator">
+                        <option value=">">Greater Than (>)</option>
+                        <option value=">=">Greater or Equal (>=)</option>
+                        <option value="<">Less Than (<)</option>
+                        <option value="<=">Less or Equal (<=)</option>
+                        <option value="==">Equals (==)</option>
+                        <option value="!=">Not Equals (!=)</option>
+                        <option value="Contains">Contains</option>
+                        <option value="StartsWith">Starts With</option>
+                        <option value="EndsWith">Ends With</option>
+                    </select>
+                    <input type="text" class="value" placeholder="Value">
+                    <select class="logic">
+                        <option value="&&">AND</option>
+                        <option value="||">OR</option>
+                    </select>
+                    <button class="btn btn-danger" onclick="removeFilterRow('filter-${filterCount}')">✕</button>
+                `;
+
+            container.appendChild(row);
+        }
+
+        function removeFilterRow(id) {
+            const row = document.getElementById(id);
+            if (row) row.remove();
+        }
+
+        function buildFilterExpression() {
+            const rows = document.querySelectorAll('.filter-row');
+            let expression = '';
+
+            rows.forEach((row, index) => {
+                const property = row.querySelector('.property').value;
+                const operator = row.querySelector('.operator').value;
+                const value = row.querySelector('.value').value;
+                const logic = row.querySelector('.logic').value;
+
+                if (!value) return;
+
+                if (expression) {
+                    expression += ` ${logic} `;
+                }
+
+                if (['Contains', 'StartsWith', 'EndsWith'].includes(operator)) {
+                    expression += `${property}.${operator}("${value}")`;
+                } else {
+                    const isString = property === 'Name' || property === 'Email';
+                    const formattedValue = isString ? `"${value}"` : value;
+                    expression += `${property} ${operator} ${formattedValue}`;
+                }
+            });
+
+            return expression;
+        }
+
+        function clearFilters() {
+            document.getElementById('filterRows').innerHTML = '';
+            document.getElementById('rawFilter').value = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('resultsCard').style.display = 'none';
+            document.getElementById('currentFilter').innerHTML = '';
+            filterCount = 0;
+        }
+
+        async function fetchStudents() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const includes = document.getElementById('includes').value;
+            const rawFilter = document.getElementById('rawFilter').value;
+
+            let filterExpression = rawFilter || buildFilterExpression();
+
+            if (!filterExpression) {
+                alert('Please add at least one filter or enter a raw filter expression');
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append('filter', filterExpression);
+            console.log('Filter Expression:', filterExpression);
+            if (includes) params.append('includes', includes);
+
+            const fullUrl = `${apiUrl}?${params.toString()}`;
+
+            document.getElementById('currentFilter').innerHTML = `
+                    <div class="raw-filter">
+                        <strong>Current Filter:</strong> ${filterExpression}<br>
+                        <strong>Full URL:</strong> ${fullUrl}
+                    </div>
+                `;
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">⏳ Loading...</div>';
+            document.getElementById('resultsCard').style.display = 'block';
+
+            try {
+                const response = await fetch(fullUrl);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="success">No students found matching the filter criteria.</div>';
+                    return;
+                }
+
+                let tableHtml = `
+                        <div class="success">Found ${data.length} student(s)</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Firstname</th>
+                                    <th>Age</th>
+                                    <th>Group</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                data.forEach(student => {
+                    tableHtml += `
+                            <tr>
+                                <td>${student.id || 'N/A'}</td>
+                                <td>${student.firstName || 'N/A'}</td>
+                                <td>${student.age || 'N/A'}</td>
+                                <td>${student.groupName || 'N/A'}</td>
+                            </tr>
+                        `;
+                });
+
+                tableHtml += '</tbody></table>';
+                resultsDiv.innerHTML = tableHtml;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Error: ${error.message}<br><br>Make sure your API is running and CORS is enabled.</div>`;
+            }
+        }
+
+        // Add initial filter row
+        addFilterRow();
+    </script>
+</body>
+</html>
