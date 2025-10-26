@@ -19,6 +19,7 @@ public static class ApplicationLayerRegistration
         // Register specific services
         services.AddScoped<IStudentService, StudentManager>();
         services.AddScoped<IAuthService, AuthManager>();
+        services.AddScoped<IImageService, ImageManager>();
 
         // Configure JWT settings
         services.Configure<JwtSettings>(options => 

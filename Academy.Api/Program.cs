@@ -1,4 +1,5 @@
 using Academy.Application;
+using Academy.Application.Constants;
 using Academy.Infrastructure;
 using Academy.Infrastructure.DataContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -83,6 +84,9 @@ namespace Academy.Api
                 };
             });
 
+            builder.Services.Configure<FilePathConstants>(builder.Configuration.GetSection("FilePathConstants"));
+            //FilePathConstants.StudentImagesPath = Path.Combine(builder.Environment.WebRootPath, "images", "students");
+          
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

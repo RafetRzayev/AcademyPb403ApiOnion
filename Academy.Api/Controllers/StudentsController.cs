@@ -1,6 +1,7 @@
 ﻿using Academy.Application.Dtos.StudentDtos;
 using Academy.Application.Services.Interfaces;
 using Academy.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
@@ -9,6 +10,7 @@ namespace Academy.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class StudentsController : ControllerBase
     {
         private readonly IStudentService _studentService;
@@ -56,7 +58,7 @@ namespace Academy.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateStudentDto createStudentDto)
+        public async Task<IActionResult> Create([FromForm] CreateStudentDto createStudentDto)
         {
             var createdStudent = await _studentService.CreateAsync(createStudentDto);
 
